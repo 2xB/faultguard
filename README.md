@@ -1,5 +1,8 @@
 # Faultguard
 
+[![Build Status](https://travis-ci.com/2xB/faultguard.svg?branch=master)](https://travis-ci.com/2xB/faultguard)
+[![GitHub license](https://img.shields.io/github/license/2xB/faultguard.svg)](https://github.com/2xB/faultguard)
+
 Rescuing data from abrubt process termination in python.
 
 ## Introduction
