@@ -1,6 +1,11 @@
 language: python
 python:
- - "2.7"
- - "3.6"
+- '2.7'
+- '3.6'
 script:
- - pytest 
+- pytest
+deploy:
+  provider: pypi
+  user: "2xB"
+  password:
+    secure: KIdTK+wCfwuzNGbi0UocqSTNmkAaVchBNR1GMFOtlnP8O9f4WzXeMDfftPVKvkKj5+cUMbiqpaPT+BvMAEXAqb2U8uz91vBuWs7sZPQxoVn4X30eTPNCcEyY1qGMyPtC+qLJNrbydaZTlNAZc2IULjnhnRbnxrqFPGLQgVa8d0lV7Np+QxjU1n9dum5FLq5QWwkwuJSpDazHnIokbEKYj+bF/9RJqbUIm9sB/gS/7ZcWc1eWbdePdO078AA6fFpNhG1zg/B4pLJzZojXhuchiw96Vwcit4veYC3wNLPUCH9yWJleLIIciKxJ4gWh6DihwOv000FiHhw2o/6Pvjfci1tN4n6dggTBLa3tadgCCY4Rbvej+Fo28+01RTzJehYUUomKJYzyR/z+p3D7VnjNvxhQNx+2IkMvzYJZ4PAECWpf0NPfUeVz0iRK/ljKY7hXLiCe8YkmGVAWr8TdoUFNSymwkXev4cpV2OCQlY3Q/ryYUgvoKYei/4WuI1n72cJYDiq4cyL1sDMvv+bm32mrFpv8cb8NrcItw2pZmiGzYjZkvryz5Kf3tLP4E4Vrl/c1EteL2RDbvkFO/yjoCs+jPE6wx+bRPkm9RoOam97kqorixCQW8te6De7bFrBi2++wbXt0situaCQ9EWVdROjlaAO+DTf4T7e5/f2HubKCbxQ=
