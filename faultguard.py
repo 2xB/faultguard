@@ -3,36 +3,36 @@ import pickle
 import collections
 
 class FaultguardDict(collections.MutableMapping):
-	"""
-	Dictionary-like object.
+    """
+    Dictionary-like object.
 
-	Stores data in the faultguard process. Every data is automatically serialized and deserialized using pickle.
-	If the application process(es) experience a fault, the data in this object should be preserved.
-	"""
-	def __init__(self, managed_dict):
-		self.store = managed_dict
+    Stores data in the faultguard process. Every data is automatically serialized and deserialized using pickle.
+    If the application process(es) experience a fault, the data in this object should be preserved.
+    """
+    def __init__(self, managed_dict):
+        self.store = managed_dict
 
-	def __getitem__(self, key):
-		return pickle.loads(self.store[key])
+    def __getitem__(self, key):
+        return pickle.loads(self.store[key])
 
-	def __setitem__(self, key, value):
-		self.store[key] = pickle.dumps(value)
+    def __setitem__(self, key, value):
+        self.store[key] = pickle.dumps(value)
 
-	def __delitem__(self, key):
-		del self.store[key]
+    def __delitem__(self, key):
+        del self.store[key]
 
-	def __iter__(self):
-		return iter(self.store)
+    def __iter__(self):
+        return iter(self.store)
 
-	def __len__(self):
-		return len(self.store)
+    def __len__(self):
+        return len(self.store)
     
 def wrapped_launch(launch, managed_dict, args):
-	faultguard_data = FaultguardDict(managed_dict)
-	if args is None:
-		launch(faultguard_data)
-	else:
-		launch(faultguard_data, args)
+    faultguard_data = FaultguardDict(managed_dict)
+    if args is None:
+        launch(faultguard_data)
+    else:
+        launch(faultguard_data, args)
 
 def start(launch, rescue, args = None):
     """
