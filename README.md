@@ -4,7 +4,7 @@
 [![GitHub license](https://img.shields.io/github/license/2xB/faultguard.svg)](https://github.com/2xB/faultguard)
 [![pypi version](https://img.shields.io/pypi/v/faultguard.svg)](https://pypi.org/project/faultguard/)
 
-Rescuing data from abrubt process termination in Python.
+Rescuing data from abrubt process termination in Python3.
 
 ## Introduction
 
