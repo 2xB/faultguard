@@ -1,8 +1,8 @@
 from multiprocessing import Process, Manager
 import pickle
-import collections
+from collections.abc import MutableMapping
 
-class FaultguardDict(collections.MutableMapping):
+class FaultguardDict(MutableMapping):
     """
     Dictionary-like object.
 

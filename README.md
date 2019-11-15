@@ -4,11 +4,11 @@
 [![GitHub license](https://img.shields.io/github/license/2xB/faultguard.svg)](https://github.com/2xB/faultguard)
 [![pypi version](https://img.shields.io/pypi/v/faultguard.svg)](https://pypi.org/project/faultguard/)
 
-Rescuing data from abrubt process termination in python.
+Rescuing data from abrubt process termination in Python.
 
 ## Introduction
 
-If a process experiences e.g. a segmentation fault, it cannot execute further operations to recover. Also, memory of a process is considered inconsistent after a segmentation fault. As soon as a project depends on third party libraries, the appearence of such faults is out of hand. Therefore, to implement a crash handler for important data, an approach to prepare for rescuing data after an abrupt process termination is needed. This module uses the python modules 'pickle', 'multiprocessing' and 'collections', to serialize and deserialize various types of data and provides a dictory-like data type to save and recover important data in the adress space of an independent process.
+If a process experiences e.g. a segmentation fault, it cannot execute further operations to recover. Also, memory of a process is considered inconsistent after a segmentation fault. As soon as a project depends on third party libraries, the appearence of such faults is out of hand. Therefore, to implement a crash handler for important data, an approach to prepare for rescuing data after an abrupt process termination is needed. This module uses the Python modules 'pickle', 'multiprocessing' and 'collections', to serialize and deserialize various types of data and provides a dictory-like data type to save and recover important data in the adress space of an independent process.
 
 This module is really simple, although its functionality is very reuseable. If you are versed in this topic, feel encouraged to look into the source code and to contribute through (well documented ;) ) pull requests.
 
@@ -18,7 +18,7 @@ This module is available through pip or can be installed manually via setup.py.
 
 ## Disclamer
 
-This module is focused on projects that e.g. rely on native libraries and have important data. It will not provide you any help in fixing a segmentation fault and you should feel encouraged to learn about the python module 'faulthandler' and the use of 'gdm' to fix faults in your own code. If you somehow manage to generate a segmentation fault in the faultguard data dictionary, and therefore destroy the guard process, the rescue will of course not work. This module is an additional security option, not an excuse for irresponsible programming!
+This module is focused on projects that e.g. rely on native libraries and have important data. It will not provide you any help in fixing a segmentation fault and you should feel encouraged to learn about the Python module 'faulthandler' and the use of 'gdm' to fix faults in your own code. If you somehow manage to generate a segmentation fault in the faultguard data dictionary, and therefore destroy the guard process, the rescue will of course not work. This module is an additional security option, not an excuse for irresponsible programming!
 
 ## Example
 
