@@ -9,6 +9,7 @@ Rescuing data from abrubt process termination in Python3.
 ## Introduction
 
 If a process experiences e.g. a segmentation fault, it cannot execute further operations to recover. Also, memory of a process is considered inconsistent after a segmentation fault. As soon as a project depends on third party libraries, the appearence of such faults is out of hand. Therefore, to implement a crash handler for important data, an approach to prepare for rescuing data after an abrupt process termination is needed. This module uses the Python modules 'pickle', 'multiprocessing' and 'collections', to serialize and deserialize various types of data and provides a dictory-like data type to save and recover important data in the adress space of an independent process.
+The Python module 'signal' is used to ensure signals like keyboard interrupts are handled correctly and received by the process itself.
 
 This module is really simple, although its functionality is very reuseable. If you are versed in this topic, feel encouraged to look into the source code and to contribute through (well documented ;) ) pull requests.
 

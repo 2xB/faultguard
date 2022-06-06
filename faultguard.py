@@ -1,6 +1,7 @@
 from multiprocessing import Process, Manager
 import pickle
 from collections.abc import MutableMapping
+import signal
 
 class FaultguardDict(MutableMapping):
     """
@@ -27,7 +28,11 @@ class FaultguardDict(MutableMapping):
     def __len__(self):
         return len(self.store)
     
-def wrapped_launch(launch, managed_dict, args):
+def wrapped_launch(launch, managed_dict, signal_handlers, args):
+    # Attach signal handlers
+    for sig in signal_handlers:
+        signal.signal(sig, signal_handlers[sig])
+    
     faultguard_data = FaultguardDict(managed_dict)
     if args is None:
         launch(faultguard_data)
@@ -46,13 +51,31 @@ def start(launch, rescue, args = None):
     :returns: The applications exit code.
     """
     
+    # Detach signal handlers from faultguard process
+    # Ensures faultguard does not interfere with signals like SIGINT
+    orig_handlers = {}
+    for sig in signal.Signals:
+        if   str(sig) == "Signals.CTRL_C_EVENT" \
+          or str(sig) == "Signals.CTRL_BREAK_EVENT" \
+          or str(sig) == "Signals.SIGKILL" \
+          or str(sig) == "Signals.SIGSTOP" \
+          or str(sig) == "Signals.SIGCHLD":
+            continue
+        orig_handlers[sig] = signal.signal(sig, signal.SIG_IGN)
+    
+    # Setup process
     manager = Manager()
     managed_dict = manager.dict()
 
-    p = Process(target=wrapped_launch, args=(launch, managed_dict, args,))
+    p = Process(target=wrapped_launch, args=(launch, managed_dict, orig_handlers, args,))
     
+    # Run process
     p.start()
     p.join()
+    
+    # Re-attach signal handlers
+    for sig in orig_handlers:
+        signal.signal(sig, orig_handlers[sig])
     
     if p.exitcode != 0:
         faultguard_data = FaultguardDict(managed_dict)
