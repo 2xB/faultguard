@@ -6,7 +6,7 @@ with open("README.md", "r") as fh:
 
 setup(
     name='faultguard',
-    version='1.0.3.post1',
+    version='1.1.0',
     py_modules=['faultguard'],
     url='https://github.com/2xB/faultguard',
     license='BSD 3-Clause License',

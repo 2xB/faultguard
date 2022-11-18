@@ -1,5 +1,6 @@
 import faultguard
 import numpy as np
+import os
 
 def launch(faultguard_data, args):
     """
@@ -42,7 +43,7 @@ def rescue(faultguard_data, exit_code, args):
     
     # Check if fault occurs before data was initialized
     if "important_data_1" not in faultguard_data or "important_data_2" not in faultguard_data:
-        return
+        raise RuntimeError("Faultguard dict content missing")
     
     # Restore data
     important_data_1 = faultguard_data["important_data_1"]
@@ -54,5 +55,14 @@ def rescue(faultguard_data, exit_code, args):
     assert np.all(important_data_1 == [6, 7, 5])
     assert important_data_2 == "Hello World01234567"
     
-def test_main():
+def test_main_autosave():
+    if os.path.isfile("test2.tmp.xz"):
+        os.remove("test2.tmp.xz")
+    
+    faultguard.start(launch, rescue, args=("Hello", "World"), autosave_interval=3, autosave_file="test2.tmp.xz")
+    
+    assert not os.path.isfile("test2.tmp.xz")
+    assert not os.path.isfile("test2.tmp.xz.tmp")
+    
+def test_main_no_autosave():
     faultguard.start(launch, rescue, args=("Hello", "World"))
