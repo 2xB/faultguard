@@ -111,11 +111,11 @@ def start(launch, rescue, args=None, autosave_interval=None, autosave_file=None)
     # Ensures faultguard does not interfere with signals like SIGINT
     orig_handlers = {}
     for sig in signal.Signals:
-        if   str(sig) == "Signals.CTRL_C_EVENT" \
-          or str(sig) == "Signals.CTRL_BREAK_EVENT" \
-          or str(sig) == "Signals.SIGKILL" \
-          or str(sig) == "Signals.SIGSTOP" \
-          or str(sig) == "Signals.SIGCHLD":
+        if   sig.name == "CTRL_C_EVENT" \
+          or sig.name == "CTRL_BREAK_EVENT" \
+          or sig.name == "SIGKILL" \
+          or sig.name == "SIGSTOP" \
+          or sig.name == "SIGCHLD":
             continue
         orig_handlers[sig] = signal.signal(sig, signal.SIG_IGN)
     
