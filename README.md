@@ -4,94 +4,36 @@
 [![GitHub license](https://img.shields.io/github/license/2xB/faultguard.svg)](https://github.com/2xB/faultguard)
 [![pypi version](https://img.shields.io/pypi/v/faultguard.svg)](https://pypi.org/project/faultguard/)
 
-Let users save important data after a crash of your Python3 application.
+Preventing data loss of your Python3 application. Keeps important data both duplicated in memory and on disk.
 
-## Introduction
+## Overview
 
-If a process experiences e.g. a segmentation fault, it cannot execute further operations to recover. Also, memory of a process is considered inconsistent after a segmentation fault. However, as soon as a project depends on third party libraries, the appearence of such faults is out of hand.
+Usually, after a crash through e.g. a segmentation fault or a power outage, data of running applications is lost. In environments where this is problematic – e.g. when users should not loose their work or important data is collected –, `faultguard` prevents data loss in two ways:
 
-This module provides an approach to implement a crash rescue handler that can access important data even after segmentation faults: While the guarded application runs (see `launch` function in the example below), it has access to a special Python dictionary (`faultguard_data` in example) in which it stores a copy of important user data. Data stored in this dictionary remains accessible when the guarded application abruptly terminates, at which point a rescue handler can access the dictionary and rescue data from there (`rescue` function in example).
+ 1. `faultguard` keeps the selected data automatically backed up in a second process. This way, if your Python application crashes - even with a segmentation fault caused e.g. by an external library -, in most cases the backup process is still running and immediately provides its data to a rescue handling function that you can define. This even allows you to e.g. provide users with a custom graphical dialog informing about the crash and providing options for the recovered data.
+ 
+ 2. `faultguard` can save the selected data automatically in customizable time intervals to a file from which it can be recovered on the next application launch.
 
-Starting the application with a given rescue handler is just one line of code when using `faultguard`, shown in the `main` function in the example below.
+An example using all features of `faultguard` can be found in `example.py`.
 
-On the technical side, this is realized through Python modules `pickle`, `multiprocessing` and `collections`, which are used to serialize and deserialize various types of data and provide the dictionary-like data type that is available in both the guarded application and the rescue handler process.
-The Python module 'signal' is used to ensure signals like keyboard interrupts are handled correctly and received by the guarded process.
+To secure an application data using `faultguard`, you define a `launch` function that `faultguard` provides with a custom data dictionary. This dictionary, although working like a usual dictionary and accepting all content that can be serialized using `pickle`, is automatically backed up as described above. If the guarded application crashes, the backup process launches a crash handler in form of a `rescue` function also defined by you and provides it with the backed up dictionary. Additionally, if you provide `faultguard` with a time interval and a path for autosaves, it stores the data on disk and you can call the `recover` method to recover the file content and call your `rescue` function.
 
-This module is really simple, although its functionality is very reuseable. Feel encouraged to look into the source code and to contribute through (well documented :D ) pull requests!
+The `faultguard` interface is very simple - you just provide it with a `launch` and a `rescue` function and everything else works automatically. If you use autosaving, on application launch you should additionally test if a backup file exists, which would show that `faultguard` did previously not exit properly. If a backup file exists, you should let `faultguard` recover it and then delete it to make place for a new one.
+
+On the technical side, the in-memory backup is realized through Python modules `pickle`, `multiprocessing` and `collections`, which are used to serialize and deserialize various types of data and provide the dictionary-like data type that is available in both the guarded application and the rescue handler process. The autosave functionality uses the Python module `lzma` for efficient compression of autosave files and `os` for file handling.
+The Python module `signal` is used to ensure signals like keyboard interrupts are handled correctly and received by the guarded process.
+
+Feel encouraged to look into the source code and to contribute through (well documented :D ) pull requests!
+
+Faultguard is tested on Linux and Windows.
 
 ## Installation
 
-This module is available through pip or can be installed manually via setup.py.
+This module is available via `pip install faultguard` or can be installed manually via `setup.py`, e.g. downloading the source code and running `python setup.py install`.
 
-## Disclamer
+## Disclaimer
 
 If a crash is observed frequently or reproducibly, it should be diagnosed – e.g. with `faulthandler` (another Python module) and `gdb`. If you somehow manage to generate a segmentation fault in the `faultguard` data dictionary, and therefore destroy the guard process, the rescue will of course not work. Preventing faults from happening in the first place is always the most important, so don't rely solely on this module, just use it as an additional safety net!
-
-## Example
-
-It follows a minimal working example for this module:
-
-```python
-import faultguard
-import numpy as np
-
-def launch(faultguard_data, args):
-    """
-    Demo software main method
-    
-    :param faultguard_data: Faultguard data dictionary
-    :param args: Data passed from faultguard.start.
-    """
-    print("Launching demo")
-    
-    # Some important data
-    important_data_1 = np.array([1,2,3])
-    important_data_2 = args[0] + " " + args[1]
-    
-    # Some dummy important data manipulation
-    for i in range(10):
-        important_data_1[i%3] = i
-        important_data_2 += str(i)
-        print("important_data_1:", important_data_1)
-        print("important_data_2:", important_data_2)
-        
-        # Sending important data to faultguard process
-        faultguard_data["important_data_1"] = important_data_1
-        faultguard_data["important_data_2"] = important_data_2
-        
-        # Generate segfault
-        if i == 7:
-            import ctypes
-            ctypes.string_at(0)
-            
-def rescue(faultguard_data, exit_code, args):
-    """
-    Demo rescue handler
-    
-    :param faultguard_data: Faultguard data dictionary
-    :param exit_code: Exit code of occured fault.
-    :param args: Data passed from faultguard.start.
-    """
-    print("Fault occured. Exit code: {}. Rescued data:".format(exit_code))
-    
-    # Check if fault occurs before data was initialized
-    if "important_data_1" not in faultguard_data or "important_data_2" not in faultguard_data:
-        return
-    
-    # Restore data
-    important_data_1 = faultguard_data["important_data_1"]
-    important_data_2 = faultguard_data["important_data_2"]
-    
-    # You might need to assign the class here by important_data_1.__class__ = ...
-    print("important_data_1:", important_data_1)
-    print("important_data_2:", important_data_2)
-    
-def main():
-    faultguard.start(launch, rescue, args=("Hello", "World"))
-
-if __name__ == "__main__":
-    main()
-```
 
 ## Credit
 
