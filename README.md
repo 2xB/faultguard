@@ -36,7 +36,7 @@ Faultguard is tested on Linux and Windows.
 
 ## Installation
 
-This module is available via `pip install faultguard` or can be installed manually via `setup.py`, e.g. downloading the source code and running `python setup.py install`.
+This module is available via `pip install faultguard` or can be installed manually via `setup.py`, e.g. downloading the source code and running `pip install .` inside the downloaded folder.
 
 ## Disclaimer
 
