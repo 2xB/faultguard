@@ -39,7 +39,18 @@ def wrapped_launch(launch, managed_dict, signal_handlers, args):
     else:
         launch(faultguard_data, args)
 
-def recover(rescue, autosave_file=None):
+def is_active(autosave_file):
+    """
+    Test if the process creating a given autosave file is running.
+    
+    :param autosave_file: Path to autosave file.
+    """
+    import os
+    import time
+    
+    return abs(os.stat(autosave_file).st_atime - time.time()) < 2
+
+def recover(rescue, autosave_file):
     """
     Load the given faultguard data dictionary from an autosave file and pass it to a rescue function.
     
@@ -50,6 +61,12 @@ def recover(rescue, autosave_file=None):
     # Compression library
     import lzma
     import os
+    
+    if is_active(autosave_file):
+        import time
+        time.sleep(2)
+        if is_active(autosave_file):
+            raise RuntimeError("Trying to access a backup of a process that is still running.")
 
     success = True
     try:
@@ -133,11 +150,9 @@ def start(launch, rescue, args=None, autosave_interval=None, autosave_file=None)
     else:
         # Compression library
         import lzma
+        import time
         
         while p.is_alive():
-            # Wait for next autosave
-            p.join(autosave_interval)
-            
             # Autosave
             if os.path.isfile(autosave_file + ".tmp"):
                 os.remove(autosave_file + ".tmp")
@@ -145,6 +160,15 @@ def start(launch, rescue, args=None, autosave_interval=None, autosave_file=None)
             
             with lzma.open(autosave_file, "w") as f:
                 pickle.dump(dict(managed_dict), f)
+            mod_time = time.time()
+            
+            # Wait for next autosave
+            remaining_interval = autosave_interval
+            while remaining_interval > 1:
+                remaining_interval -= 1
+                p.join(1)
+                os.utime(autosave_file, (time.time(), mod_time))
+            p.join(remaining_interval)
     
     # Close Manager process
     # If this is not done and the faultguard process is terminated, the Manager process

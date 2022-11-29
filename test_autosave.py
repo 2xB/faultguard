@@ -53,14 +53,20 @@ def test_main():
     # Prepare test environment
     if os.path.isfile("test.tmp.xz"):
         os.remove("test.tmp.xz")
+    if os.path.isfile("test.tmp.xz.tmp"):
+        os.remove("test.tmp.xz.tmp")
     
     p = Process(target=run_test)
     
     # Run process
     p.start()
-    p.join(2)
+    p.join(3)
+    assert faultguard.is_active("test.tmp.xz")
     os.rename("test.tmp.xz", "test.tmp.xz.backup")
     p.join()
+    import time
+    time.sleep(3)
+    assert not faultguard.is_active("test.tmp.xz.backup")
     
     os.rename("test.tmp.xz.backup", "test.tmp.xz")
     assert faultguard.recover(recover, "test.tmp.xz") == 0
@@ -69,3 +75,6 @@ def test_main():
     with open("test.tmp.xz", "w") as f:
         f.write("Test")
     assert faultguard.recover(recover, "test.tmp.xz") == 1
+    
+    os.remove("test.tmp.xz")
+    os.remove("test.tmp.xz.tmp")

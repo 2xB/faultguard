@@ -2,6 +2,7 @@ import faultguard
 import numpy as np
 import os
 import time
+import sys
 
 def launch(faultguard_data, args):
     """
@@ -61,7 +62,12 @@ def recover(faultguard_data):
 def main(use_autosave=True):
     if use_autosave:
         if os.path.isfile("test.tmp.xz"):
-            print("Autosave exists:")
+            print("Autosave exists.")
+            
+            if faultguard.is_active("test.tmp.xz"):
+                print("Trying to launch the example twice. Since it uses a static autosave file path, starting it twice with autosave enabled does not work.")
+                sys.exit(-1)
+            
             faultguard.recover(recover, "test.tmp.xz")
             os.remove("test.tmp.xz")
         

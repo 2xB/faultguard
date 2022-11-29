@@ -14,14 +14,21 @@ Usually, after a crash through e.g. a segmentation fault or a power outage, data
  
  2. `faultguard` can save the selected data automatically in customizable time intervals to a file from which it can be recovered on the next application launch.
 
+### Example
+
 An example using all features of `faultguard` can be found in `example.py`.
 
-To secure an application data using `faultguard`, you define a `launch` function that `faultguard` provides with a custom data dictionary. This dictionary, although working like a usual dictionary and accepting all content that can be serialized using `pickle`, is automatically backed up as described above. If the guarded application crashes, the backup process launches a crash handler in form of a `rescue` function also defined by you and provides it with the backed up dictionary. Additionally, if you provide `faultguard` with a time interval and a path for autosaves, it stores the data on disk and you can call the `recover` method to recover the file content and call your `rescue` function.
+### Usage
 
-The `faultguard` interface is very simple - you just provide it with a `launch` and a `rescue` function and everything else works automatically. If you use autosaving, on application launch you should additionally test if a backup file exists, which would show that `faultguard` did previously not exit properly. If a backup file exists, you should let `faultguard` recover it and then delete it to make place for a new one.
+To secure an application data using `faultguard`, you define a `launch` function that receives a custom data dictionary from `faultguard`. This dictionary, although working like a usual dictionary and accepting all content that can be serialized using `pickle`, is automatically backed up as described above. If the guarded application crashes, the backup process launches a crash handler in form of a `rescue` function also defined by you and provides it with the backed up dictionary. Additionally, if you provide `faultguard` with a time interval and a path for autosaves, it stores the data on disk and you can call the `recover` method to recover the file content and call your `rescue` function. `faultguard` will raise a `RuntimeError` when trying to write to an existing autosave file or reading the autosave file of a running process.
 
-On the technical side, the in-memory backup is realized through Python modules `pickle`, `multiprocessing` and `collections`, which are used to serialize and deserialize various types of data and provide the dictionary-like data type that is available in both the guarded application and the rescue handler process. The autosave functionality uses the Python module `lzma` for efficient compression of autosave files and `os` for file handling.
+The `faultguard` interface is very simple - you just provide it with a `launch` and a `rescue` function and everything else works automatically. If you use autosaving, on application launch you should additionally check for backup files and use `is_active` to see if the process corresponding to an autosave file is still active. If not, that would show that `faultguard` did previously not exit properly, so you can then let `faultguard` `recover` the file.
+
+### Technical description
+
+On the technical side, the in-memory backup is realized through Python modules `pickle`, `multiprocessing` and `collections`, which are used to serialize and deserialize various types of data and provide the dictionary-like data type that is available in both the guarded application and the rescue handler process.
 The Python module `signal` is used to ensure signals like keyboard interrupts are handled correctly and received by the guarded process.
+The autosave functionality uses the Python module `lzma` for efficient compression of autosave files, `os` for file handling and `time` for measuring the time since a process corresponding to a backup file was last active.
 
 Feel encouraged to look into the source code and to contribute through (well documented :D ) pull requests!
 
